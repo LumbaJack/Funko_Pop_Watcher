@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
-
+import subprocess
 from popwatch import config
 from threading import Thread
 from popwatch.storeStock import storeStock

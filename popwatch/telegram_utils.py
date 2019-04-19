@@ -5,7 +5,7 @@ import validators
 import portalocker
 
 from popwatch import config
-from urllib.parse import urlparse
+from urlparse import urlparse
 
 _LOG = logging.getLogger(__name__)
 
@@ -94,6 +94,7 @@ class telegramUtils(object):
                                   "/add - takes a parameter URL and adds it to search list\n"
                                   "/delete - takes a parameter URL and deletes it from the search list\n"
                                   "/list - lists current pop search list\n")
+                                  #"/setup - Creates User Profile for Auto Checkout\n"
 
     def error(self, bot, update, error):
         """Log Errors caused by Updates."""

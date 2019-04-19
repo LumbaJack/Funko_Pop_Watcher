@@ -4,14 +4,26 @@ import yaml
 import yaml.error
 import logging
 import logging.config
+import platform
+from operator import itemgetter
 
 _LOG = logging.getLogger(__name__)
+
+def get_distro():
+    # Checking Distrobution before passing in connection string
+    distroName = platform.system()
+    return distroName
 
 global GLOBAL_CONFIG
 global CONFIG_FILE
 global CONFIG_FILE_ERROR
 
-CONFIG_FILE = os.environ.get('FUNKO_POP_WATCH_CONFIG', './examples/pop_watch.yaml')
+if get_distro() == "Raspbian GNU/Linux":
+    CONFIG_FILE = os.environ.get('FUNKO_POP_WATCH_CONFIG', '/root/FunkoATCBot/examples/pop_watch.yaml')
+elif get_distro() == "Windows":
+    CONFIG_FILE = os.environ.get('FUNKO_POP_WATCH_CONFIG', './examples/pop_watch_windows.yaml')
+else:
+    CONFIG_FILE = os.environ.get('FUNKO_POP_WATCH_CONFIG', './examples/pop_watch.yaml')
 
 try:
     with open(CONFIG_FILE, "r") as f:
@@ -75,6 +87,12 @@ TELEGRAM_CHAT_ID = GLOBAL_CONFIG.get('TELEGRAM_CHAT_ID', os.environ['TELEGRAM_CH
 
 # Pops Settings
 FUNKO_POP_LIST = GLOBAL_CONFIG.get('FUNKO_POP_LIST')
+USER_INFO = GLOBAL_CONFIG.get('USER_INFO')
 
 # Chrome Driver Settings
-DRIVER_LOCATION = GLOBAL_CONFIG.get('DRIVER_LOCATION', '.\chromedriver.exe')
+if get_distro() == "Linux":
+    DRIVER_LOCATION = GLOBAL_CONFIG.get('DRIVER_LOCATION', './chromedriver')
+elif get_distro() == "Windows":
+    DRIVER_LOCATION = GLOBAL_CONFIG.get('DRIVER_LOCATION', './chromedriver.exe')
+elif get_distro() == "Darwin":
+    DRIVER_LOCATION = GLOBAL_CONFIG.get('DRIVER_LOCATION', '/usr/bin/chromedriver')

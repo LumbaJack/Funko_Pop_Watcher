@@ -1,8 +1,10 @@
+
 # Pop Settings
-FUNKO_POP_LIST: 'D:\My Documents\SVN\Funko_Pop_Watcher\pops.json'
+FUNKO_POP_LIST: './pops.json'
+USER_INFO: './profile.json'
 
 # Chrome Driver Settings
-DRIVER_LOCATION: 'D:\My Documents\SVN\ebay-item-lister\chromedriver.exe'
+DRIVER_LOCATION: '/usr/bin/chromedriver'
 
 logging_config:
   version: 1
