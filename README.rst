@@ -26,6 +26,10 @@ Usage
    a. curl https://api.telegram.org/bot[TELEGRAM_TOKEN]/getUpdates -v
    b. This will give you the channel id to use in the code
  3. Then you can either run the included executable or running the code directly.
+ 4. Set *Environement Variable* -> **POPENV** to "dev", "stg", or "prd"
+   a. **dev** sets the quantity to purchase to 1, chrome options to have '--headless' *DISABLED*, and **DOES NOT PERFORM AUTOCHECKOUT**
+   b. **stg** sets the quantity to purchase to 3, chrome options to have '--headless' *DISABLED*, and **DOES PERFORM AUTOCHECKOUT**
+   c. **prd** sets the quantity to purchase to 5, chrome options to have '--headless' *ENABLED*, and **DOES PERFORM AUTOCHECKOUT**
 
 Bot Usage
 ----------
@@ -59,6 +63,7 @@ History
 	- Gemini Collectibles
 	- Target
   * 11/08/2018: Added readme, requirements and made code readable
+  * 04/18/2019: View Following this [Pull Request](https://github.com/LumbaJack/Funko_Pop_Watcher/pull/2)
 
 License
 ---------------------

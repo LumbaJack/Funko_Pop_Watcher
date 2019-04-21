@@ -7,6 +7,7 @@ import requests
 import portalocker
 import platform
 import os
+import subprocess
 
 from popwatch import config
 from popwatch import popProfiles
@@ -104,12 +105,8 @@ class storeStock(object):
         state_selection =  WebDriverWait(self.driver, 20).until(
         EC.element_to_be_clickable((By.XPATH, '//*[@id="dwfrm_singleshipping_shippingAddress_addressFields_states_state"]/option[5]')))
         state_selection.click()
-        if site in ['hottopic']:
-            phone_form = self.driver.find_element_by_id("dwfrm_singleshipping_shippingAddress_addressFields_phone")
-            phone_form.send_keys(profile.phone)
-        else:
-            phone_form = self.driver.find_element_by_id("formatted-phone")
-            phone_form.send_keys(profile.phone)
+        phone_form = self.driver.find_element_by_id("formatted-phone")
+        phone_form.send_keys(profile.phone)
         # Continue to Billing Button
         continueBillingBtn = WebDriverWait(self.driver, 20).until(
         EC.element_to_be_clickable((By.XPATH, '//*[@id="dwfrm_singleshipping_shippingAddress"]/div[2]/fieldset/div/button')))
@@ -133,7 +130,14 @@ class storeStock(object):
         reviewBillingBtn.click()
         # Place Order Button
         if os.environ['POPENV'] == "dev":
-            self.UPDATER.bot.send_message(chat_id=config.TELEGRAM_CHAT_ID, text="Funko Bot in Test Mode. Checkout Not Proceeding")
+            self.UPDATER.bot.send_message(chat_id=config.TELEGRAM_CHAT_ID,
+                                          text="Funko Bot in Test Mode. Checkout Not Proceeding")
+        elif os.environ['POPENV'] == "stg":
+            self.UPDATER.bot.send_message(chat_id=config.TELEGRAM_CHAT_ID,
+                                          text="Running Checkout Process Without Headless")
+            placeOrderBtn = WebDriverWait(self.driver, 20).until(
+                EC.element_to_be_clickable((By.XPATH, '//*[@id="summarySubmit"]')))
+            placeOrderBtn.click()
         elif os.environ['POPENV'] == "prd":
             placeOrderBtn = WebDriverWait(self.driver, 20).until(
             EC.element_to_be_clickable((By.XPATH, '//*[@id="summarySubmit"]')))
@@ -233,9 +237,10 @@ class storeStock(object):
         chrome_options = Options()
         if os.environ['POPENV'] == "dev":
             print('Not Setting Headless for Development Purposes')
+        elif os.environ['POPENV'] == "stg":
+            print("Will run checkout process without headless chrome option enabled")
         elif os.environ['POPENV'] == "prd":
-            print "Temp Disable"
-            #chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--headless")
         chrome_options.add_argument("--credentials_enable_service=false")
         chrome_options.add_argument("--profile.password_manager_enabled=false")
         chrome_options.add_argument("--no-sandbox")
@@ -292,7 +297,7 @@ class storeStock(object):
                 # Adds Item to the Cart
                 self.driver.get(url)
                 # Check if Pop Overlay Exists
-                popup = self.driver.find_elements_by_xpath('//*[@id="acsMainInvite"]/div/a[1]')
+                popup = self.driver.find_elements_by_xpath('//*[@id="acsFocusFirst"]')
 
                 # Logic to Close Pop when it does exist
                 for popupCloseBtn in popup:
@@ -308,9 +313,19 @@ class storeStock(object):
                 # A. This will also dictate the original message sent to channel
                 # B. This will dictate number to buy
                 # NOTE: May want to run multiple instances and buy in singles.
+                # Setup Quantity Sudo Dynamic
+                if os.environ['POPENV'] == "dev":
+                    amount = "1"
+                    quantitySelectorString = '//*[@id="Quantity"]/option[' + amount + ']'
+                elif os.environ['POPENV'] == "stg":
+                    amount = "3"
+                    quantitySelectorString = '//*[@id="Quantity"]/option[' + amount + ']'
+                elif os.environ['POPENV'] == "prd":
+                    amount = "5"
+                    quantitySelectorString = '//*[@id="Quantity"]/option[' + amount + ']'
                 # Select Quantity
                 quantity = WebDriverWait(self.driver, 20).until(
-                    EC.element_to_be_clickable((By.XPATH, '//*[@id="Quantity"]/option[1]')))
+                    EC.element_to_be_clickable((By.XPATH, quantitySelectorString)))
                 quantity.click()
                 # Add to Cart Button
                 atcBtn = WebDriverWait(self.driver, 20).until(
@@ -323,12 +338,56 @@ class storeStock(object):
                     self.driver.get(cartLink)
                     # Function to do Checkout Process
                     self.ht_bl_checkout_process(site)
+                    # Check if Pop Overlay Exists Again
+                    # This is to allow for Clean Order Screenshot
+                    popup = self.driver.find_elements_by_xpath('//*[@id="acsFocusFirst"]')
+
+                    # Logic to Close Pop when it does exist
+                    for popupCloseBtn in popup:
+                        popInnerText = popupCloseBtn.get_attribute('innerText')
+                        if popInnerText:
+                            print('Pop Found Initiating Closer of Pop Up')
+                            # Pop Up Found and Needs to be Dismissed
+                            popup.click()
+                        else:
+                            self.driver.refresh()
+                    # Take Screen Shot of Order
+                    self.driver.save_screenshot("order.png")
+                    self.UPDATER.bot.send_message(chat_id=config.TELEGRAM_CHAT_ID,
+                                                  text="Checkout was SUCCESSFUL! Order Screenshot Below")
+                    self.UPDATER.bot.send_photo(chat_id=config.TELEGRAM_CHAT_ID, photo=open('./order.png', 'rb'))
+                    # Quit After Checkout
+                    self.driver.quit()
+                    # Remove Order Image from Disk
+                    subprocess.Popen('rm -rf ./order.png', shell=True, stdout=subprocess.PIPE)
                 elif site in ['boxlunch']:
                     cartLink = "https://www.boxlunch.com/cart"
                     # Checkout Button
                     self.driver.get(cartLink)
                     # Function to do Checkout Process
                     self.ht_bl_checkout_process(site)
+                    # Check if Pop Overlay Exists Again
+                    # This is to allow for Clean Order Screenshot
+                    popup = self.driver.find_elements_by_xpath('//*[@id="acsFocusFirst"]')
+
+                    # Logic to Close Pop when it does exist
+                    for popupCloseBtn in popup:
+                        popInnerText = popupCloseBtn.get_attribute('innerText')
+                        if popInnerText:
+                            print('Pop Found Initiating Closer of Pop Up')
+                            # Pop Up Found and Needs to be Dismissed
+                            popup.click()
+                        else:
+                            self.driver.refresh()
+                    # Take Screen Shot of Order
+                    self.driver.save_screenshot("order.png")
+                    self.UPDATER.bot.send_message(chat_id=config.TELEGRAM_CHAT_ID,
+                                                  text="Checkout was SUCCESSFUL! Order Screenshot Below")
+                    self.UPDATER.bot.send_photo(chat_id=config.TELEGRAM_CHAT_ID, photo=open('./order.png', 'rb'))
+                    # Quit After Checkout
+                    self.driver.quit()
+                    # Remove Order Image from Disk
+                    subprocess.Popen('rm -rf ./order.png', shell=True, stdout=subprocess.PIPE)
             elif site in ['walmart', 'barnesandnoble', 'gamestop', 'blizzard', 'geminicollectibles', 'hbo']:
                 # Checkout Process for Other Sites
                 if site in ['hbo']:
