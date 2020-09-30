@@ -1,11 +1,11 @@
-Funko-Pop-Watch
+Funko-Pop-Watch - An Amazing Project
 ==============
 .. contents:: :depth: 1
 
 Description
 ----------
 
- **NOTE: will only work on fixes as I have time. This is just a small script to get a Pop I need.** This is a script to scrape funko pop websites to check for item availability. It sends notification via the app "Telegram". 
+ **NOTE: Will only work on fixes as I have time. This is just a small script to get a Pop I need.** This is a script to scrape funko pop websites to check for item availability. It sends a notification via the app "Telegram". 
 
 Running the utility from command line
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -17,7 +17,7 @@ Running the utility from command line
 
 Requirements
 ----------
- This program requires you install the app "Telegram". Then you will need to create an API token. Instruction on how to do that can be found here: https://core.telegram.org/bots#6-botfather
+ This program requires you to install the app "Telegram". Then you will need to create an API token. Instruction on how to do that can be found here: https://core.telegram.org/bots#6-botfather
 
 Usage
 ----------
