@@ -17,7 +17,7 @@ Running the utility from command line
 
 Requirements
 ----------
- This program requires you install the app "Telegram". Then you will need to create an API token. Instruction on how to do that can be found here: https://core.telegram.org/bots#6-botfather
+ This program requires you to install the app "Telegram". Then you will need to create an API token. Instruction on how to do that can be found here: https://core.telegram.org/bots#6-botfather
 
 Usage
 ----------
