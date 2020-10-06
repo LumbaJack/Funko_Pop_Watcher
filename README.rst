@@ -1,4 +1,4 @@
-Funko-Pop-Watch
+Funko-Pop-Watch (an amazing project)
 ==============
 .. contents:: :depth: 1
 
